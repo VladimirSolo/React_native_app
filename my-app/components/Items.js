@@ -1,8 +1,8 @@
 import { StyleSheet, Text } from "react-native";
 
-export function Items({ element }) {
+export function Items({ post }) {
   return (
-      <Text style={styles.text}>{element.username}</Text>
+      <Text style={styles.text}>{post.title}</Text>
   );
 }
 

@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { Spinner } from "../components/Spinner";
 
-function Details({ route, navigation }) {
-  const [user, setUser] = useState({});
+function Details({ route }) {
+  const [post, setPost] = useState({});
   const [loading, setLoading] = useState(true);
   const { id } = route.params;
 
   const fetchData = async () => {
     try {
       let response = await fetch(
-        `https://jsonplaceholder.typicode.com/users/${id}`
+        `https://jsonplaceholder.typicode.com/posts/${id}`
       );
       const result = await response.json();
-      setUser(result);
+      setPost(result);
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -31,8 +31,7 @@ function Details({ route, navigation }) {
 
   return (
     <View style={styles.details}>
-      <Text>NAME: {user.name}</Text>
-      <Text>EMAIL: {user.email}</Text>
+      <Text>{post.body}</Text>
     </View>
   );
 }

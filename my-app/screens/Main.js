@@ -1,28 +1,66 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, FlatList, TouchableOpacity } from "react-native";
-import { useEffect, useState } from "react";
+import { StyleSheet, View, FlatList, TouchableOpacity, RefreshControl } from "react-native";
+import { useEffect, useRef, useState } from "react";
 import { Items } from "../components/Items";
 import { Spinner } from "../components/Spinner";
 
 function Main({ navigation }) {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState(0);
 
   const fetchData = async () => {
     try {
-      let response = await fetch("https://jsonplaceholder.typicode.com/users");
+      let response = await fetch("https://jsonplaceholder.typicode.com/posts");
       const result = await response.json();
+
       setList(result);
       setLoading(false);
+      setRefresh(false);
+      setLastRefreshTime(Date.now());
+      
     } catch (error) {
       console.log(error);
       setLoading(false);
+      setRefresh(false);
+    }
+  };
+  const onPull = () => {
+    if (!refresh && Date.now() - lastRefreshTime > 15000) {
+      setRefresh(true);
+      fetchData();
     }
   };
 
+  const handleScroll = () => {
+    clearInterval(intervalRef.current);
+  };
+
+  const intervalRef = useRef(null);
+
   useEffect(() => {
     fetchData();
+    setLastRefreshTime(Date.now());
+
+    intervalRef.current = setInterval(fetchData, 60000);
+
+    return () => {
+      clearInterval(intervalRef.current);
+    };
+
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+
+      if (Date.now() - lastRefreshTime > 15000) {
+        onPull();
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, lastRefreshTime]);
 
   return (
     <View style={styles.main}>
@@ -30,18 +68,24 @@ function Main({ navigation }) {
         <Spinner />
       ) : (
         <FlatList
-          data={list}
+        data={list.slice(0, 25)}
           renderItem={({ item }) => {
             return (
               <TouchableOpacity
                 style={styles.item}
                 onPress={() => navigation.navigate("Details", { id: item.id })}
               >
-                <Items element={item} />
+                <Items post={item} />
               </TouchableOpacity>
             );
           }}
           keyExtractor={(item) => item.id.toString()}
+          refreshControl={
+            <RefreshControl 
+            refreshing={refresh}
+            onRefresh={onPull}/>
+          }
+          onScrollBeginDrag={handleScroll}
         />
       )}
       <StatusBar style="auto" />
