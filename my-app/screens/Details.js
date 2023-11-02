@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { Spinner } from "../components/Spinner";
+import { useDispatch } from 'react-redux'
+import { fetchDetails } from "../slice/detailsSlice";
 
 function Details({ route }) {
   const [post, setPost] = useState({});
   const [loading, setLoading] = useState(true);
   const { id } = route.params;
+  
+  const dispatch = useDispatch();
 
   const fetchData = async () => {
     try {
-      let response = await fetch(
-        `https://jsonplaceholder.typicode.com/posts/${id}`
-      );
-      const result = await response.json();
-      setPost(result);
+      const response = await dispatch(fetchDetails(id)).unwrap()
+      setPost(response);
       setLoading(false);
     } catch (error) {
       console.log(error);

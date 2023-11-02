@@ -3,6 +3,8 @@ import { StyleSheet, View, FlatList, TouchableOpacity, RefreshControl } from "re
 import { useEffect, useRef, useState } from "react";
 import { Items } from "../components/Items";
 import { Spinner } from "../components/Spinner";
+import { useDispatch } from 'react-redux'
+import { fetchPosts } from "../slice/postsSlice";
 
 function Main({ navigation }) {
   const [list, setList] = useState([]);
@@ -10,22 +12,22 @@ function Main({ navigation }) {
   const [refresh, setRefresh] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState(0);
 
+  const dispatch = useDispatch();
+  
   const fetchData = async () => {
     try {
-      let response = await fetch("https://jsonplaceholder.typicode.com/posts");
-      const result = await response.json();
-
-      setList(result);
+      const response = await dispatch(fetchPosts()).unwrap();
+      setList(response);
       setLoading(false);
       setRefresh(false);
       setLastRefreshTime(Date.now());
-      
     } catch (error) {
       console.log(error);
       setLoading(false);
       setRefresh(false);
     }
   };
+
   const onPull = () => {
     if (!refresh && Date.now() - lastRefreshTime > 15000) {
       setRefresh(true);
