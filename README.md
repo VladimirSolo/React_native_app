@@ -4,7 +4,7 @@
 
 ## Installation and Setup Instructions
 
-📦Clone down this repository. You will need `node` and `yarn` installed globally on your machine.
+📦Clone down this repository. You will need `npm` installed globally on your machine.
 
 ```bash
 $ git clone https://github.com/VladimirSolo/React_native_app
